@@ -39,7 +39,7 @@ pipeline {
                             if (testResult != 0) {
                                 FAILED_STAGE_NAME = "${STAGE_NAME}"
                                 throw e
-                            }else 
+                            } 
                         }
                     }catch (Exception e) {
                             FAILED_STAGE_NAME = "${STAGE_NAME}"
