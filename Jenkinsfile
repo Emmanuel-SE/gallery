@@ -1,3 +1,4 @@
+/* groovylint-disable CatchException, CompileStatic, DuplicateStringLiteral, LineLength, NestedBlockDepth, NoDef, SpaceAfterClosingBrace, VariableTypeRequired */
 pipeline {
     agent any
     tools {
