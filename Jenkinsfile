@@ -35,12 +35,15 @@ pipeline {
                 script {
                     try {
                         withCredentials([usernameColonPassword(credentialsId: 'heroku', variable: 'HEROKU_CREDENTIALS')]) {
-                    /* groovylint-disable-next-line GStringExpressionWithinString */
-                            sh 'git push https://${HEROKU_CREDENTIALS}@git.heroku.com/guarded-crag-27337.git master'
+                            def deploymentResult = sh(script: 'git push https://${HEROKU_CREDENTIALS}@git.heroku.com/guarded-crag-27337.git master', returnStatus: true)
+                            if (testResult != 0) {
+                                FAILED_STAGE_NAME = "${STAGE_NAME}"
+                                throw e
+                            }else 
                         }
-                }catch (Exception e) {
-                        FAILED_STAGE_NAME = "${STAGE_NAME}"
-                    }
+                    }catch (Exception e) {
+                            FAILED_STAGE_NAME = "${STAGE_NAME}"
+                        }
                 }
             }
         }
