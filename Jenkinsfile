@@ -20,9 +20,10 @@ pipeline {
                     def testResult = sh(script: 'npm run test', returnStatus: true)
                     if (testResult != 0) {
                         currentBuild.result = 'FAILURE'
+                        FAILED_STAGE_NAME = "${STAGE_NAME}"
                         mail to: "${USER_EMAIL}", subject: "Test failed for build ${BUILD_ID}", body: "Test failed for build ${BUILD_ID}. Please check."
                     }else {
-                        // currentBuild.result = 'SUCCESS'
+                        currentBuild.result = 'SUCCESS'
                         mail to: "${USER_EMAIL}", subject: "Test succesfull for build ${BUILD_ID}", body: "Test succesfull for build ${BUILD_ID}."
                     }
                 }
@@ -30,9 +31,13 @@ pipeline {
         }
         stage('Deploy to Heroku') {
             steps {
-                withCredentials([usernameColonPassword(credentialsId: 'heroku', variable: 'HEROKU_CREDENTIALS')]) {
+                try {
+                    withCredentials([usernameColonPassword(credentialsId: 'heroku', variable: 'HEROKU_CREDENTIALS')]) {
                     /* groovylint-disable-next-line GStringExpressionWithinString */
-                    sh 'git push https://${HEROKU_CREDENTIALS}@git.heroku.com/gentle-waters-11368.git master'
+                        sh 'git push https://${HEROKU_CREDENTIALS}@git.heroku.com/gentle-waters-11368.git master'
+                    }
+                }catch (Exception e) {
+                     FAILED_STAGE_NAME = "${STAGE_NAME}"
                 }
             }
         }
@@ -43,7 +48,7 @@ pipeline {
                     def slackMessage = "Pipeline ${currentBuild.result == 'FAILURE' ? 'failed' : 'succeeded'}"
 
                     if (currentBuild.result == 'FAILURE') {
-                        slackMessage += " at stage: ${STAGE_NAME}. Build ID: ${BUILD_ID}."
+                        slackMessage += " at stage: ${FAILED_STAGE_NAME}. Build ID: ${BUILD_ID}."
                     } else {
                         slackMessage += ". Build ID: ${BUILD_ID}. App URL:${APP_URL}"
                     }
