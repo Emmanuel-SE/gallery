@@ -39,11 +39,11 @@ pipeline {
                             if (testResult != 0) {
                                 FAILED_STAGE_NAME = "${STAGE_NAME}"
                                 throw e
-                            } 
+                            }
                         }
                     }catch (Exception e) {
                             FAILED_STAGE_NAME = "${STAGE_NAME}"
-                        }
+                    }
                 }
             }
         }
@@ -65,6 +65,34 @@ pipeline {
                         slackSend channel: "${SLACK_CHANNEL}", color: 'danger', iconEmoji: 'x', message: 'The live site may be affected. Check the deployment.', tokenCredentialId: 'jenkins-slack'
                     }
                 }
+        }
+        success {
+            emailext attachLog: true,
+                body:
+                    """
+                    <p>EXECUTED: Job <b>\'${env.JOB_NAME}:${env.BUILD_NUMBER})\'</b></p>
+                    <p>
+                    View console output at
+                    "<a href="${env.BUILD_URL}">${env.JOB_NAME}:${env.BUILD_NUMBER}</a>"
+                    </p>
+                      <p><i>(Build log is attached.)</i></p>
+                    """,
+                subject: "Status: 'SUCCESS' -Job \'${env.JOB_NAME}:${env.BUILD_NUMBER}\'",
+                to: 'emmanueltiti370@gmail.com'
+                }
+        failure {
+            emailext attachLog: true,
+                body:
+                    """
+                    <p>EXECUTED: Job <b>\'${env.JOB_NAME}:${env.BUILD_NUMBER})\'</b></p>
+                    <p>
+                    View console output at
+                    "<a href="${env.BUILD_URL}">${env.JOB_NAME}:${env.BUILD_NUMBER}</a>"
+                    </p>
+                      <p><i>(Build log is attached.)</i></p>
+                    """,
+                subject: "Status: FAILURE -Job \'${env.JOB_NAME}:${env.BUILD_NUMBER}\'",
+                to: 'emmanueltiti370@gmail.com'
         }
     }
 }
